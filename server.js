@@ -74,7 +74,7 @@ app.post("/api/solve", async (req, res) => {
   if (!client) {
     return res.status(500).json({
       error:
-        "ANTHROPIC_API_KEY ayarlı değil. Sunucuyu başlatmadan önce .env dosyasına anahtarınızı ekleyin.",
+        "ANTHROPIC_API_KEY is not set. Add your key to the .env file before starting the server.",
     });
   }
 
@@ -93,24 +93,24 @@ app.post("/api/solve", async (req, res) => {
       { type: "text", text: VISION_PROMPT },
     ];
   } else {
-    return res.status(400).json({ error: "Geçersiz istek (görüntü ya da ifade gerekli)." });
+    return res.status(400).json({ error: "Invalid request (image or expression required)." });
   }
 
   try {
     const { json, text } = await askClaude(content);
     if (!json) {
-      return res.status(502).json({ error: "Model yanıtı çözümlenemedi.", raw: text });
+      return res.status(502).json({ error: "Could not parse the model response.", raw: text });
     }
     return res.json(json);
   } catch (err) {
     console.error("solve error:", err);
     const status = err?.status || 500;
-    return res.status(status).json({ error: err?.message || "Claude isteği başarısız oldu." });
+    return res.status(status).json({ error: err?.message || "Claude request failed." });
   }
 });
 
 app.listen(PORT, () => {
-  const keyState = client ? "✓ ayarlı" : "✗ EKSİK (.env)";
-  console.log(`\n  CameraBoard çalışıyor →  http://localhost:${PORT}`);
+  const keyState = client ? "✓ set" : "✗ MISSING (.env)";
+  console.log(`\n  CameraAIBoard running →  http://localhost:${PORT}`);
   console.log(`  Model: ${MODEL}   |   ANTHROPIC_API_KEY: ${keyState}\n`);
 });

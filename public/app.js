@@ -125,12 +125,12 @@ function selectColor(color) {
 
 function setBadge(name) {
   const map = {
-    draw: ["✏️ Çizim", "draw"],
-    erase: ["🧽 Silgi", "erase"],
-    clear: ["🧹 Temizle", "clear"],
-    solve: ["🤖 Çöz", "solve"],
-    palette: ["🎨 Renk seç", ""],
-    none: ["✋ Hazır", ""],
+    draw: ["✏️ Draw", "draw"],
+    erase: ["🧽 Erase", "erase"],
+    clear: ["🧹 Clear", "clear"],
+    solve: ["🤖 Solve", "solve"],
+    palette: ["🎨 Pick color", ""],
+    none: ["✋ Ready", ""],
   };
   const [label, cls] = map[name] || map.none;
   badge.textContent = label;
@@ -255,7 +255,7 @@ function handlePalette(name, p, tNow) {
       if (tNow - dwell.start >= DWELL_MS && !dwell.done) {
         selectColor(sw.color);
         dwell.done = true;
-        showToast("Renk seçildi 🎨");
+        showToast("Color selected 🎨");
       }
     } else {
       dwell.color = sw.color;
@@ -280,7 +280,7 @@ function handleHeld(name, tNow) {
     }
     if (heldFrames > 0 && heldFrames <= HOLD_FRAMES) {
       const dots = "•".repeat(Math.min(3, Math.ceil((heldFrames / HOLD_FRAMES) * 3)));
-      badge.textContent = (name === "clear" ? "🧹 Temizle " : "🤖 Çöz ") + dots;
+      badge.textContent = (name === "clear" ? "🧹 Clear " : "🤖 Solve ") + dots;
     }
     if (heldFrames === HOLD_FRAMES) {
       if (name === "clear") doClear();
@@ -391,7 +391,7 @@ function doClear() {
   board.clear();
   octx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
   correctionCard.classList.add("hidden");
-  showToast("Tahta temizlendi");
+  showToast("Board cleared");
 }
 
 async function doSolve() {
@@ -399,7 +399,7 @@ async function doSolve() {
   finalizeStroke(); // son çizgiyi kesin olarak board'a yaz
   octx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
   if (board.isEmpty()) {
-    showToast("Önce bir denklem çizin ✏️", { error: true });
+    showToast("Draw an equation first ✏️", { error: true });
     return;
   }
   solving = true;
@@ -411,14 +411,14 @@ async function doSolve() {
     const data = board.snapshotForOCR();
     const out = await solveImage(data);
     if (!out.found || out.answer === "") {
-      showToast("Denklem okunamadı. Daha net yazmayı deneyin.", { error: true });
+      showToast("Couldn't read the equation. Try writing more clearly.", { error: true });
     } else {
       board.renderAnswer(out.answer, activeColor);
       showCorrection(out.equation, out.answer);
       hideToast();
     }
   } catch (err) {
-    showToast(err.message || "Çözüm başarısız oldu", { error: true });
+    showToast(err.message || "Solving failed", { error: true });
   } finally {
     solving = false;
     solveBtn.disabled = false;
@@ -445,19 +445,19 @@ async function applyCorrection() {
   try {
     let answer;
     if (isAlgebra) {
-      showToast("Hesaplanıyor…", { spinner: true, sticky: true });
+      showToast("Computing…", { spinner: true, sticky: true });
       const out = await solveText(text);
       hideToast();
-      if (!out.found || out.answer === "") throw new Error("Çözülemedi");
+      if (!out.found || out.answer === "") throw new Error("Couldn't solve");
       answer = out.answer;
     } else {
       answer = evaluateExpression(text);
     }
     board.renderAnswer(answer, activeColor);
     correctionAnswer.textContent = fmtAns(answer);
-    showToast("Güncellendi ✓");
+    showToast("Updated ✓");
   } catch (err) {
-    showToast(err.message || "İfade hesaplanamadı", { error: true });
+    showToast(err.message || "Couldn't evaluate the expression", { error: true });
   } finally {
     correctionFix.disabled = false;
   }
@@ -466,7 +466,7 @@ async function applyCorrection() {
 // ---------- Startup ----------
 async function init() {
   startBtn.disabled = true;
-  splashNote.textContent = "Model yükleniyor…";
+  splashNote.textContent = "Loading model…";
   try {
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
     const make = (delegate) =>
@@ -485,12 +485,12 @@ async function init() {
     }
   } catch (err) {
     console.error(err);
-    splashNote.textContent = "Model yüklenemedi. İnternet bağlantınızı kontrol edin.";
+    splashNote.textContent = "Failed to load model. Check your internet connection.";
     startBtn.disabled = false;
     return;
   }
 
-  splashNote.textContent = "Kamera açılıyor…";
+  splashNote.textContent = "Starting camera…";
   try {
     // Görüntü keskin kalsın diye kamera yüksek çözünürlükte; el takibi ayrı
     // küçük tuvalde yapıldığı için performans bundan etkilenmez.
@@ -502,7 +502,7 @@ async function init() {
     await video.play();
   } catch (err) {
     console.error(err);
-    splashNote.textContent = "Kamera izni reddedildi ya da kamera bulunamadı.";
+    splashNote.textContent = "Camera permission denied or no camera found.";
     startBtn.disabled = false;
     return;
   }

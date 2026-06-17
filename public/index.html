@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CameraBoard · Parmakla Çizim & Denklem Çözücü</title>
+    <title>CameraAIBoard · Finger-Drawing Equation Solver</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="preconnect" href="https://storage.googleapis.com" />
     <link rel="stylesheet" href="styles.css" />
@@ -11,63 +11,63 @@
   <body>
     <div class="stage" id="stage">
       <video id="video" playsinline muted></video>
-      <!-- Kalıcı çizim katmanı -->
+      <!-- Persistent drawing layer -->
       <canvas id="board"></canvas>
-      <!-- Geçici imleç / iskelet katmanı -->
+      <!-- Transient cursor / skeleton layer -->
       <canvas id="overlay"></canvas>
 
-      <!-- Sol üst: hareket rehberi -->
+      <!-- Top-left: gesture guide -->
       <div class="legend" id="legend">
-        <div class="legend-title">Hareketler</div>
+        <div class="legend-title">Gestures</div>
         <ul>
-          <li><span class="ic">☝️</span> 1 parmak — <b>Çizim</b></li>
-          <li><span class="ic">🖐️</span> Açık el — <b>Silgi</b></li>
-          <li><span class="ic">👍</span> Baş yukarı — <b>Çöz (=)</b></li>
-          <li><span class="ic">👎</span> Baş aşağı — <b>Temizle</b></li>
-          <li><span class="ic">🎨</span> Renge işaret edip <b>bekle</b></li>
+          <li><span class="ic">☝️</span> 1 finger — <b>Draw</b></li>
+          <li><span class="ic">🖐️</span> Open hand — <b>Erase</b></li>
+          <li><span class="ic">👍</span> Thumbs-up — <b>Solve (=)</b></li>
+          <li><span class="ic">👎</span> Thumbs-down — <b>Clear</b></li>
+          <li><span class="ic">🎨</span> Point at a color & <b>hold</b></li>
         </ul>
-        <div class="legend-hint">Aritmetik ya da x'li denklem (örn. 2x+3=7) yaz, 👍 ile çöz.</div>
+        <div class="legend-hint">Write arithmetic or an x-equation (e.g. 2x+3=7), then 👍 to solve.</div>
       </div>
 
-      <!-- Sağ üst: durum etiketi -->
-      <div class="gesture-badge" id="gestureBadge">Başlatılıyor…</div>
+      <!-- Top-right: status badge -->
+      <div class="gesture-badge" id="gestureBadge">Starting…</div>
 
-      <!-- Solve sonrası düzeltme kartı -->
+      <!-- Post-solve correction card -->
       <div class="correction-card hidden" id="correctionCard">
         <div class="cc-row">
-          <span class="cc-label">Tanınan:</span>
+          <span class="cc-label">Recognized:</span>
           <input id="correctionInput" type="text" autocomplete="off" spellcheck="false" />
         </div>
         <div class="cc-answer" id="correctionAnswer">= ?</div>
         <div class="cc-buttons">
-          <button id="correctionFix" class="btn small">↻ Düzelt & Hesapla</button>
-          <button id="correctionOk" class="btn small ghost">✓ Doğru</button>
+          <button id="correctionFix" class="btn small">↻ Fix &amp; recompute</button>
+          <button id="correctionOk" class="btn small ghost">✓ Correct</button>
         </div>
       </div>
 
-      <!-- Alt: renk paleti + aksiyonlar -->
+      <!-- Bottom: color palette + actions -->
       <div class="toolbar" id="toolbar">
         <div class="swatches" id="swatches"></div>
         <div class="tools">
           <label class="brush">
-            Kalınlık
+            Size
             <input id="brushSize" type="range" min="3" max="26" value="9" />
           </label>
-          <button id="solveBtn" class="btn">= Çöz</button>
-          <button id="clearBtn" class="btn ghost">Temizle</button>
+          <button id="solveBtn" class="btn">= Solve</button>
+          <button id="clearBtn" class="btn ghost">Clear</button>
         </div>
       </div>
 
-      <!-- Yükleme / hata kaplaması -->
+      <!-- Loading / error overlay -->
       <div class="toast hidden" id="toast"></div>
 
-      <!-- Başlangıç ekranı -->
+      <!-- Start screen -->
       <div class="splash" id="splash">
         <div class="splash-card">
-          <h1>CameraBoard ✋➗</h1>
-          <p>Parmağınızla havaya yazın, yapay zekâ denklemi okuyup cevabı tahtaya yazsın.</p>
-          <button id="startBtn" class="btn big">Kamerayı Başlat</button>
-          <small id="splashNote">Kamera izni gerekir · veriler yalnızca çözüm için gönderilir.</small>
+          <h1>CameraAIBoard ✋➗</h1>
+          <p>Write in the air with your finger; the AI reads your equation and writes the answer on the board.</p>
+          <button id="startBtn" class="btn big">Start Camera</button>
+          <small id="splashNote">Camera permission required · data is sent only to solve.</small>
         </div>
       </div>
     </div>

@@ -18,7 +18,7 @@ async function post(body) {
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(json.error || `Sunucu hatası (${res.status})`);
+    throw new Error(json.error || `Server error (${res.status})`);
   }
   return json; // { found, type, equation, answer }
 }
@@ -38,10 +38,10 @@ export function evaluateExpression(input) {
     .replace(/=+\s*$/, "") // drop a trailing =
     .trim();
 
-  if (!expr) throw new Error("Boş ifade");
+  if (!expr) throw new Error("Empty expression");
   // Charset guard: digits, operators (+ - * /, ** for power), parens, dot, space.
   if (!/^[-+*/().\d\s]+$/.test(expr)) {
-    throw new Error("Geçersiz karakter");
+    throw new Error("Invalid character");
   }
 
   let value;
@@ -49,10 +49,10 @@ export function evaluateExpression(input) {
     // eslint-disable-next-line no-new-func
     value = Function('"use strict"; return (' + expr + ");")();
   } catch {
-    throw new Error("Hesaplanamadı");
+    throw new Error("Could not evaluate");
   }
   if (typeof value !== "number" || !isFinite(value)) {
-    throw new Error("Geçersiz sonuç");
+    throw new Error("Invalid result");
   }
   // Round to at most 4 decimals, trim trailing zeros.
   return String(Math.round(value * 1e4) / 1e4);
