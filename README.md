@@ -1,92 +1,98 @@
 # CameraAIBoard ✋➗
 
-> **Havada parmağınızla yazın, yapay zekâ çözsün.**
-> Draw math in the air with your finger — AI reads it and writes the answer back on screen.
+> **Draw math in the air with your finger — AI reads it and writes the answer back on screen.**
 
-Kameraya bakıp **parmağınızla havaya yazarsınız**; uygulama elinizi gerçek
-zamanlı takip ederek çizim yapar, yazdığınız denklemi **Claude** (görüş/OCR) ile
-okuyup sonucu yine tahtaya el yazısı gibi yazar. Hem aritmetik (`12 + 7 =`) hem
-de **x'li denklemler** (`2x + 3 = 7`, `x² − 5x + 6 = 0`) desteklenir.
+You write in the air **with your finger** in front of the camera; the app tracks
+your hand in real time, draws your strokes, then reads the equation with
+**Claude** (vision/OCR) and writes the result back onto the board in a
+handwriting style. Both arithmetic (`12 + 7 =`) and **equations in x**
+(`2x + 3 = 7`, `x² − 5x + 6 = 0`) are supported.
 
-Tarayıcıda **Google MediaPipe Hand Landmarker** (21 noktalı, gerçek zamanlı el
-takibi) + sunucu tarafında **Claude Opus 4.8** görüş modeli kullanılır.
+It uses **Google MediaPipe Hand Landmarker** (real-time, 21-point hand tracking)
+in the browser + the **Claude Opus 4.8** vision model on the server.
 
 ---
 
-## ✨ Özellikler
+## ✨ Features
 
-- 🖐️ **Eller serbest:** fare/klavye yok — her şey el hareketleriyle.
-- ✏️ **Akıcı çizim:** One-Euro filtresi + eğri yumuşatma ile titremesiz, kesintisiz çizgiler.
-- 🧽 **Silgi & temizle:** el hareketleriyle.
-- 🎨 **Elle renk seçimi:** renge işaret edip kısa süre bekleyince (dwell) seçilir.
-- 🤖 **Yapay zekâ ile çözüm:** denklemi tahtadan okur, cevabı denklemin yanına yazar.
-- 🔢 **Aritmetik + cebir:** dört işlem, üs, parantez **ve x için denklem çözme**.
-- ✅ **Düzeltme:** rakam yanlış okunduysa tanınan ifadeyi düzeltip anında yeniden hesaplatabilirsiniz.
+- 🖐️ **Hands-free:** no mouse/keyboard — everything is driven by hand gestures.
+- ✏️ **Smooth drawing:** One-Euro filter + curve smoothing for jitter-free, continuous strokes.
+- 🧽 **Erase & clear:** with hand gestures.
+- 🎨 **Pick colors by hand:** point at a swatch and dwell briefly to select it.
+- 🤖 **AI solving:** reads the equation off the board and writes the answer next to it.
+- 🔢 **Arithmetic + algebra:** four operations, powers, parentheses **and solving for x**.
+- ✅ **Correction:** if a digit is misread, edit the recognized expression and recompute instantly.
 
-## ✋ Hareketler
+## ✋ Gestures
 
-| Hareket | İşlev |
+| Gesture | Action |
 | --- | --- |
-| ☝️ Tek parmak (işaret) | Seçili renkle **çizim** |
-| 🖐️ Açık el | **Silgi** |
-| 👍 Baş yukarı başparmak (kısa süre tut) | **Çöz** — tahtayı Claude'a gönderir |
-| 👎 Baş aşağı başparmak (kısa süre tut) | Tahtayı **temizle** |
-| 🎨 İşaret parmağını renk kutusunda ~0.5 sn beklet | **Renk seç** |
+| ☝️ Single finger (index) | **Draw** in the selected color |
+| 🖐️ Open hand | **Erase** |
+| 👍 Thumbs-up (hold briefly) | **Solve** — sends the board to Claude |
+| 👎 Thumbs-down (hold briefly) | **Clear** the board |
+| 🎨 Hold index finger on a swatch ~0.5 s | **Pick color** |
 
-> Akış: denklemi yazın (örn. `2x + 3 = 7`), sonra 👍 yapın → Claude okur,
-> sonucu (`x = 2`) denklemin yanına yazar.
+> Flow: write the equation (e.g. `2x + 3 = 7`), then thumbs-up → Claude reads it
+> and writes the result (`x = 2`) next to the equation.
 
-## 🧠 Mimari
+## 🧠 Architecture
 
 ```
-tarayıcı (public/)                         sunucu (server.js)
-  ├─ MediaPipe HandLandmarker  ── el ─┐
-  ├─ filters.js   (One-Euro)          │
-  ├─ gestures.js  (hareket sınıflama) │
-  ├─ canvas.js    (çizim/silgi/cevap) │
-  └─ solver.js ── PNG / metin ───────►├─ POST /api/solve
-                                       └─ Anthropic SDK → claude-opus-4-8 (vision)
-                                          → {found, type, equation, answer}
+browser (public/)                          server (server.js)
+  ├─ MediaPipe HandLandmarker  ── hand ┐
+  ├─ filters.js   (One-Euro)           │
+  ├─ gestures.js  (gesture classify)   │
+  ├─ canvas.js    (draw/erase/answer)  │
+  └─ solver.js ── PNG / text ─────────►├─ POST /api/solve
+                                        └─ Anthropic SDK → claude-opus-4-8 (vision)
+                                           → {found, type, equation, answer}
 ```
 
-- El takibi tamamen **tarayıcıda** (WebGL/WASM) çalışır; sadece **Çöz** anında
-  tahtanın görüntüsü sunucuya gider.
-- **API anahtarı sunucuda kalır**, tarayıcıya hiç sızmaz.
-- Görüntü keskin kalsın diye el takibi ayrı küçük bir tuvalde yapılır → net
-  görüntü + düşük gecikme.
+- Hand tracking runs entirely **in the browser** (WebGL/WASM); only on **Solve**
+  is the board image sent to the server.
+- **The API key stays on the server** and is never exposed to the browser.
+- To keep the picture sharp, hand tracking runs on a separate small canvas →
+  crisp video + low latency.
 
-## 🛠 Teknolojiler
+## 🛠 Tech stack
 
-- **El takibi:** [@mediapipe/tasks-vision](https://www.npmjs.com/package/@mediapipe/tasks-vision) (HandLandmarker)
-- **Yapay zekâ:** [Anthropic Claude](https://www.anthropic.com/) (Opus 4.8, görüş)
-- **Sunucu:** Node.js + Express
-- **Önyüz:** derlemesiz vanilla JavaScript (ES modülleri) + Canvas API
+- **Hand tracking:** [@mediapipe/tasks-vision](https://www.npmjs.com/package/@mediapipe/tasks-vision) (HandLandmarker)
+- **AI:** [Anthropic Claude](https://www.anthropic.com/) (Opus 4.8, vision)
+- **Server:** Node.js + Express
+- **Frontend:** build-less vanilla JavaScript (ES modules) + Canvas API
 
-## 🚀 Kurulum
+## 🚀 Getting started
 
-Gereksinim: **Node.js 18+** ve bir Claude API anahtarı.
+Requirements: **Node.js 18+** and a Claude API key.
 
 ```bash
 git clone https://github.com/ahmetvural79/CameraAIBoard.git
 cd CameraAIBoard
 npm install
-cp .env.example .env        # ardından .env içine ANTHROPIC_API_KEY yazın
+cp .env.example .env        # then put your ANTHROPIC_API_KEY in .env
 npm start
 ```
 
-Tarayıcıdan **http://localhost:3000** adresini açın, **Kamerayı Başlat**'a basıp
-kamera iznini verin. (Kamera erişimi için sayfa `localhost` üzerinden sunulur —
-güvenli bağlam.)
+Open **http://localhost:3000** in your browser, click **Start Camera**, and
+grant camera permission. (The page is served over `localhost` so the camera
+works in a secure context.)
 
-## ⚙️ Ayarlar (`.env`)
+You can also pass the key inline:
 
-| Değişken | Varsayılan | Açıklama |
+```bash
+ANTHROPIC_API_KEY=sk-ant-... npm start
+```
+
+## ⚙️ Configuration (`.env`)
+
+| Variable | Default | Description |
 | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | — | **Gerekli.** Claude API anahtarı |
-| `CLAUDE_MODEL` | `claude-opus-4-8` | Görüş destekli herhangi bir Claude modeli |
-| `PORT` | `3000` | Sunucu portu |
+| `ANTHROPIC_API_KEY` | — | **Required.** Your Claude API key |
+| `CLAUDE_MODEL` | `claude-opus-4-8` | Any vision-capable Claude model |
+| `PORT` | `3000` | Server port |
 
-## 📁 Proje yapısı
+## 📁 Project structure
 
 ```
 CameraAIBoard/
@@ -96,26 +102,26 @@ CameraAIBoard/
 └─ public/
    ├─ index.html
    ├─ styles.css
-   ├─ app.js            kamera + MediaPipe döngüsü + UI orkestrasyonu
-   ├─ filters.js        One-Euro yumuşatma filtresi
-   ├─ gestures.js       21 nokta → hareket sınıflandırma
-   ├─ canvas.js         çizim/silgi/temizle + cevap render
-   └─ solver.js         /api/solve çağrısı + yerel güvenli hesaplayıcı
+   ├─ app.js            camera + MediaPipe loop + UI orchestration
+   ├─ filters.js        One-Euro smoothing filter
+   ├─ gestures.js       21 landmarks → gesture classification
+   ├─ canvas.js         draw/erase/clear + answer rendering
+   └─ solver.js         /api/solve call + local safe evaluator
 ```
 
-## 💡 İpuçları
+## 💡 Tips
 
-- En iyi tanıma için rakamları **iri ve net** yazın, kalın bir kalem rengi seçin.
-- Çarpma için `x` / `*`, bölme için `/`, üs için `^`, parantez için `( )`.
-- Çizim hâlâ titriyorsa `public/app.js` üstündeki `FILTER_OPTS`, `DRAW_GRACE` ve
-  `INF_W` değerleriyle ince ayar yapabilirsiniz.
+- For best recognition, write digits **large and clearly** and pick a bold pen color.
+- Use `x` / `*` for multiply, `/` for divide, `^` for power, `( )` for parentheses.
+- If drawing still feels jittery, tune `FILTER_OPTS`, `DRAW_GRACE`, and `INF_W`
+  at the top of `public/app.js`.
 
-## 🔒 Güvenlik
+## 🔒 Security
 
-API anahtarınız yalnızca sunucuda (`.env`) tutulur; `.env` `.gitignore`
-içindedir ve tarayıcıya gönderilmez. `.env.example` dosyasına **gerçek anahtar
-yazmayın** — yalnızca şablondur.
+Your API key is kept only on the server (`.env`); `.env` is in `.gitignore` and
+is never sent to the browser. **Do not put a real key in `.env.example`** — it is
+only a template.
 
-## 📄 Lisans
+## 📄 License
 
 [MIT](LICENSE)
