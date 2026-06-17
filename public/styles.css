@@ -1,0 +1,346 @@
+:root {
+  --bg: #0d0f14;
+  --panel: rgba(18, 20, 28, 0.72);
+  --panel-solid: #14161e;
+  --stroke: rgba(255, 255, 255, 0.12);
+  --text: #f2f4f8;
+  --muted: #aab2c5;
+  --accent: #5b8cff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.stage {
+  position: relative;
+  width: min(96vw, 1100px);
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+#video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+  background: #000;
+}
+
+#board,
+#overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- Sol üst rehber ---------- */
+.legend {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--stroke);
+  border-radius: 11px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  max-width: 176px;
+  z-index: 5;
+}
+.legend-title {
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.legend ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend .ic {
+  width: 18px;
+  text-align: center;
+  font-size: 13px;
+}
+.legend-hint {
+  margin-top: 7px;
+  font-size: 10px;
+  color: var(--muted);
+  border-top: 1px solid var(--stroke);
+  padding-top: 6px;
+}
+
+/* ---------- Sağ üst durum ---------- */
+.gesture-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  padding: 6px 11px;
+  font-size: 11.5px;
+  font-weight: 600;
+  z-index: 5;
+  transition: background 0.15s, color 0.15s;
+}
+.gesture-badge.draw {
+  background: rgba(91, 140, 255, 0.85);
+  color: #fff;
+}
+.gesture-badge.erase {
+  background: rgba(255, 196, 84, 0.85);
+  color: #1a1300;
+}
+.gesture-badge.clear {
+  background: rgba(255, 90, 110, 0.9);
+  color: #fff;
+}
+.gesture-badge.solve {
+  background: rgba(90, 220, 150, 0.9);
+  color: #06281a;
+}
+
+/* ---------- Alt araç çubuğu ---------- */
+.toolbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.55) 35%);
+  z-index: 5;
+  flex-wrap: wrap;
+}
+.swatches {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.swatch:hover {
+  transform: scale(1.12);
+}
+.swatch.active {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 2.5px rgba(255, 255, 255, 0.9);
+}
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.brush {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--muted);
+  pointer-events: auto;
+}
+.brush input {
+  pointer-events: auto;
+  width: 80px;
+}
+
+.btn {
+  pointer-events: auto;
+  border: 1px solid var(--stroke);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 7px 13px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: filter 0.12s, transform 0.05s;
+}
+.btn:hover {
+  filter: brightness(1.08);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.08);
+}
+.btn.small {
+  padding: 6px 10px;
+  font-size: 11.5px;
+}
+.btn.big {
+  padding: 11px 22px;
+  font-size: 15px;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---------- Düzeltme kartı ---------- */
+.correction-card {
+  position: absolute;
+  right: 10px;
+  bottom: 60px;
+  width: 218px;
+  background: var(--panel-solid);
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  padding: 10px;
+  z-index: 6;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+}
+.cc-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+.cc-label {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+#correctionInput {
+  flex: 1;
+  min-width: 0;
+  background: #0c0e14;
+  border: 1px solid var(--stroke);
+  color: var(--text);
+  border-radius: 7px;
+  padding: 6px 8px;
+  font-size: 13.5px;
+  font-family: "SF Mono", ui-monospace, Menlo, monospace;
+  pointer-events: auto;
+}
+.cc-answer {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 3px 2px 8px;
+  color: #8effc1;
+}
+.cc-buttons {
+  display: flex;
+  gap: 7px;
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--panel-solid);
+  border: 1px solid var(--stroke);
+  padding: 12px 18px;
+  border-radius: 11px;
+  font-size: 13px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 80%;
+  text-align: center;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+}
+.toast.error {
+  border-color: rgba(255, 90, 110, 0.6);
+}
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Splash ---------- */
+.splash {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(120% 120% at 50% 0%, #1a1f2e, #07080c);
+  z-index: 10;
+}
+.splash-card {
+  text-align: center;
+  max-width: 420px;
+  padding: 26px;
+}
+.splash-card h1 {
+  margin: 0 0 9px;
+  font-size: 25px;
+}
+.splash-card p {
+  color: var(--muted);
+  margin: 0 0 20px;
+  line-height: 1.5;
+  font-size: 14px;
+}
+.splash-card small {
+  display: block;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.hidden {
+  display: none !important;
+}

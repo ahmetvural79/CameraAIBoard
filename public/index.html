@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CameraBoard · Parmakla Çizim & Denklem Çözücü</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://storage.googleapis.com" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="stage" id="stage">
+      <video id="video" playsinline muted></video>
+      <!-- Kalıcı çizim katmanı -->
+      <canvas id="board"></canvas>
+      <!-- Geçici imleç / iskelet katmanı -->
+      <canvas id="overlay"></canvas>
+
+      <!-- Sol üst: hareket rehberi -->
+      <div class="legend" id="legend">
+        <div class="legend-title">Hareketler</div>
+        <ul>
+          <li><span class="ic">☝️</span> 1 parmak — <b>Çizim</b></li>
+          <li><span class="ic">🖐️</span> Açık el — <b>Silgi</b></li>
+          <li><span class="ic">👍</span> Baş yukarı — <b>Çöz (=)</b></li>
+          <li><span class="ic">👎</span> Baş aşağı — <b>Temizle</b></li>
+          <li><span class="ic">🎨</span> Renge işaret edip <b>bekle</b></li>
+        </ul>
+        <div class="legend-hint">Aritmetik ya da x'li denklem (örn. 2x+3=7) yaz, 👍 ile çöz.</div>
+      </div>
+
+      <!-- Sağ üst: durum etiketi -->
+      <div class="gesture-badge" id="gestureBadge">Başlatılıyor…</div>
+
+      <!-- Solve sonrası düzeltme kartı -->
+      <div class="correction-card hidden" id="correctionCard">
+        <div class="cc-row">
+          <span class="cc-label">Tanınan:</span>
+          <input id="correctionInput" type="text" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="cc-answer" id="correctionAnswer">= ?</div>
+        <div class="cc-buttons">
+          <button id="correctionFix" class="btn small">↻ Düzelt & Hesapla</button>
+          <button id="correctionOk" class="btn small ghost">✓ Doğru</button>
+        </div>
+      </div>
+
+      <!-- Alt: renk paleti + aksiyonlar -->
+      <div class="toolbar" id="toolbar">
+        <div class="swatches" id="swatches"></div>
+        <div class="tools">
+          <label class="brush">
+            Kalınlık
+            <input id="brushSize" type="range" min="3" max="26" value="9" />
+          </label>
+          <button id="solveBtn" class="btn">= Çöz</button>
+          <button id="clearBtn" class="btn ghost">Temizle</button>
+        </div>
+      </div>
+
+      <!-- Yükleme / hata kaplaması -->
+      <div class="toast hidden" id="toast"></div>
+
+      <!-- Başlangıç ekranı -->
+      <div class="splash" id="splash">
+        <div class="splash-card">
+          <h1>CameraBoard ✋➗</h1>
+          <p>Parmağınızla havaya yazın, yapay zekâ denklemi okuyup cevabı tahtaya yazsın.</p>
+          <button id="startBtn" class="btn big">Kamerayı Başlat</button>
+          <small id="splashNote">Kamera izni gerekir · veriler yalnızca çözüm için gönderilir.</small>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

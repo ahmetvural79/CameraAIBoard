@@ -1,0 +1,18 @@
+{
+  "name": "cameraboard",
+  "version": "1.0.0",
+  "description": "Finger-drawing math whiteboard — Google MediaPipe hand tracking + Claude vision OCR/solver",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": ">=0.40.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  }
+}
